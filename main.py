@@ -1,20 +1,3 @@
-# from scipy.optimize import dual_annealing as dual
-
-# test = [1,2,3]
-
-# def func(x):
-#     return sum(test)
-
-# bounds = [[0,5], [0,5], [0,5]]
-
-# result = dual(func, bounds)
-
-# print(result)
-
-# Objective Function
-
-# Test feasibility
-
 from __future__ import print_function
 import math
 import random
@@ -48,7 +31,6 @@ def cost(employees, shifts):
         if feasible(employees[i][0], shifts[i]) == 0:
             # cost += 1 # count penalties to compare infeasible solutions
             return None # non-numeric to distinguish from high energy solutions
-        # cost = 1000 # some number that guarantees the energy increases
     
     # if shift 3 into shift 1 with the same employee, penalize
     for i in range(len(shifts)):
@@ -57,11 +39,6 @@ def cost(employees, shifts):
     
     return cost
 
-    # # create a schedule cost matrix
-    # cost_matrix = defaultdict(dict)
-    # for i in range(len(shifts)):
-    #     for n in range(len(shifts)):
-    #         cost_matrix[employees.items()[0]] = 0.0 if shifts[i] == shifts[n] else cost(va, vb)
     
 class Scheduler(Annealer):
     def __init__(self, state, employees):
@@ -84,10 +61,7 @@ class Scheduler(Annealer):
             return 1000 # guarantee it's not accepted
         else:
             return e
-        # e = 0
-            # for i in range(len(self.state)):
-        #     e += self.cost_matrix[self.state[i-1][self.state[i]]]
-        # return e
+
 
 if __name__ == '__main__':
     # list of shift inputs
@@ -102,12 +76,6 @@ if __name__ == '__main__':
     sched.copy_strategy = "slice"
     state, e = sched.anneal()
     
-    print()
-    # # print(f'Energy: {e}')
-    # for n in range(len(employees_input)):
-    #     print(employees_input[n][0]) # print name
-    #     for i in range(7):
-    #         print(f'{state[i + 7*n]}') # print 7 shifts
     
     print('Adam')
     # print(employees_input[0:7])
@@ -121,7 +89,3 @@ if __name__ == '__main__':
     print('Alice')
     # print(employees_input[21:])
     print(list(state)[21:])
-    
-           
-        
-    # print(" -> ".join(list(map(str, state))))
