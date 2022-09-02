@@ -1,9 +1,10 @@
-from __future__ import print_function
-import math
+# Hospital scheduling app by Kelsey Glenn
+# https://github.com/kelseyfglenn/scheduler
+
 import random
-from collections import defaultdict
 from simanneal import Annealer
 import pandas as pd
+
 
 def hc1_valid_roles(employees_db, employees, shifts):
     """check if employees are qualified for shift role and return # invalid shifts"""
@@ -12,7 +13,8 @@ def hc1_valid_roles(employees_db, employees, shifts):
         if shifts[i] not in employees_db[employees[i][0]]['roles']:
             c += 1
     return c
-       
+
+    
 # Soft constraint 1: No double backing
 def sc1_no_double_back(employees, shifts):
     """check if 3->1 shifts occur and return # violations"""
@@ -21,6 +23,7 @@ def sc1_no_double_back(employees, shifts):
     #     if shifts[i] == 3 and shifts[i+1] == 1 and employees[i][0] == employees[i+1][0]:
     #         c += 1
     return c
+
 
 # Soft constraint 2: Max 4 weekend days/schedule
 def sc2_max_4_weekends(employees, shifts):
@@ -32,12 +35,14 @@ def sc2_max_4_weekends(employees, shifts):
     # c2 += len(weekend_shifts[weekend_shifts['shift'] > 4]) # +1 for every instance of 4+ weekend days
     return c
 
+
 # Soft constraint 3: Minimal split weekends
 def sc3_min_split_weekends(employees, shifts):
     c = 0
     # for day in weekend_days:
         # for i in range(len(employees)):
     return c
+
 
 # Soft constraint 4: No 7+ day stretches
 def sc4_no_7_days(employees, shifts):
@@ -57,6 +62,7 @@ def sc4_no_7_days(employees, shifts):
             c += 1
     return c
 
+
 def cost(employees_db, employees, shifts):
     """Calculate penalty cost of a schedule"""
     hard_cost, soft_cost = 0, 0
@@ -72,10 +78,8 @@ def cost(employees_db, employees, shifts):
 
     # Return total weighted cost function
     return hard_weight * hard_cost + soft_weight * soft_cost
-    
- 
 
-    
+
 class Scheduler(Annealer):
     def __init__(self, employees_db, state, employees):
         self.employees_db = employees_db
@@ -99,6 +103,7 @@ class Scheduler(Annealer):
         else:
             return e
 
+
 # test inputs
 employees_db = {
     'Adam' : {'roles' : [0, 1, 2]},
@@ -109,8 +114,9 @@ employees_db = {
 employees_input = [(key, s) for key in employees_db.keys() for s in range(28) ]
 shifts = [1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] * 4
 
-if __name__ == '__main__':
 
+# initialize employees, shift state, execute annealing and generate output CSV
+if __name__ == '__main__':
     # randomized initial assignments
     init_state = shifts
     random.shuffle(init_state)
