@@ -6,6 +6,7 @@ from simanneal import Annealer
 import pandas as pd
 
 def hc1_valid_roles(employees_db, employees, shifts):
+    """check if employees are qualified for shift role and return # invalid shifts"""
     c = 0
     for i in range(len(shifts)):
         if shifts[i] not in employees_db[employees[i][0]]['roles']:
@@ -13,7 +14,8 @@ def hc1_valid_roles(employees_db, employees, shifts):
     return c
        
 # Soft constraint 1: No double backing
-def sc1_double_back(employees, shifts):
+def sc1_no_double_back(employees, shifts):
+    """check if 3->1 shifts occur and return # violations"""
     c = 0
     # for i in range(len(shifts)):
     #     if shifts[i] == 3 and shifts[i+1] == 1 and employees[i][0] == employees[i+1][0]:
@@ -21,14 +23,21 @@ def sc1_double_back(employees, shifts):
     return c
 
 # Soft constraint 2: Max 4 weekend days/schedule
-# # count weekend shifts
-# weekend_shifts = df[(((df.date == 0) | (df.date == 6) | (df.date == 7) | (df.date == 13) | (df.date == 14) | (df.date == 20) | (df.date == 21) | (df.date == 27)) & (df['shift'] != 0))].groupby('employee').count()        
-# c2 += len(weekend_shifts[weekend_shifts['shift'] > 4]) # +1 for every instance of 4+ weekend days
+def sc2_max_4_weekends(employees, shifts):
+    """check if employees have >4 weekend shifts"""
+    c = 0
+    weekend_days = [0, 6, 7, 13, 14, 20, 21, 27]
+    # # count weekend shifts
+    # weekend_shifts = df[(((df.date == 0) | (df.date == 6) | (df.date == 7) | (df.date == 13) | (df.date == 14) | (df.date == 20) | (df.date == 21) | (df.date == 27)) & (df['shift'] != 0))].groupby('employee').count()        
+    # c2 += len(weekend_shifts[weekend_shifts['shift'] > 4]) # +1 for every instance of 4+ weekend days
+    return c
 
-# # Soft constraint 3: Minimal split weekends
-# for day in weekend_days:
-#     for i in range(len(employees)):
-        
+# Soft constraint 3: Minimal split weekends
+def sc3_min_split_weekends(employees, shifts):
+    c = 0
+    # for day in weekend_days:
+        # for i in range(len(employees)):
+    return c
 
 # Soft constraint 4: No 7+ day stretches
 def sc4_no_7_days(employees, shifts):
@@ -53,14 +62,13 @@ def cost(employees_db, employees, shifts):
     hard_cost, soft_cost = 0, 0
     hard_weight, soft_weight = 1, 1
     
-    # weekend_days = [0, 6, 7, 13, 14, 20, 21, 27]
     # zip employees, dates and shifts into a df
     df = pd.DataFrame(employees_input, columns=['employee', 'date'])
     df['shift'] = shifts
       
     # sum constraint penalties
     hard_cost = hc1_valid_roles(employees_db, employees, shifts)
-    soft_cost = sc1_double_back(employees, shifts) + sc4_no_7_days(employees, shifts)
+    soft_cost = sc1_no_double_back(employees, shifts) + sc2_max_4_weekends(employees, shifts) + sc3_min_split_weekends(employees, shifts) + sc4_no_7_days(employees, shifts)
 
     # Return total weighted cost function
     return hard_weight * hard_cost + soft_weight * soft_cost
@@ -91,7 +99,7 @@ class Scheduler(Annealer):
         else:
             return e
 
-
+# test inputs
 employees_db = {
     'Adam' : {'roles' : [0, 1, 2]},
     'Julie' : {'roles' : [0, 2, 3]},
@@ -102,28 +110,23 @@ employees_input = [(key, s) for key in employees_db.keys() for s in range(28) ]
 shifts = [1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] * 4
 
 if __name__ == '__main__':
-    # list of shift inputs
-    # shifts = [1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
     # randomized initial assignments
     init_state = shifts
     random.shuffle(init_state)
     
+    # execute annealing algo
     sched = Scheduler(employees_db, init_state, employees_input)
     sched.set_schedule(sched.auto(minutes=0.2))
     sched.copy_strategy = "slice"
     state, e = sched.anneal()
     
-    
-    print('Adam')
-    # print(employees_input[0:7])
-    print(list(state)[:28])
-    print('Julie')
-    # print(employees_input[7:14])
-    print(list(state)[28:56])
-    print('Dave')
-    # print(employees_input[14:21])
-    print(list(state)[56:84])
-    print('Alice')
-    # print(employees_input[21:])
-    print(list(state)[84:112])
+    # format schedule for output
+    output = pd.DataFrame(employees_input, columns=['employee', 'date'])
+    output['shift'] = state
+    output = output.set_index(['employee', 'date']).unstack(level=[1]).reset_index()
+    output.columns = output.columns.get_level_values(0)
+    output.columns = range(29)
+    output = output.rename(columns={0:'Employee'})
+    output.to_csv('schedule.csv')
+
