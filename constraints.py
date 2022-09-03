@@ -59,6 +59,7 @@ class Constraints():
 
     # Soft constraint 4: No 7+ day stretches
     def sc4_no_7_days(self):
+        """Check that no employee works a 7 day stretch"""
         c = 0
         consecutive_count = 0    
         current_employee = self.employees[0][0]
@@ -82,10 +83,29 @@ class Constraints():
         return c
     
     # Soft constraint 6: Shift distribution equal between team members
-    def sc6_shift_dist_equal(self):
-        c = 0
-        ###
-        return c
+    def sc6_shift_dist_equal(self):    
+        "Check that employees have an even distribution of shifts"
+        # calculate mean # of shifts per person
+        shift_count = 0
+        for shift in self.shifts:
+            if shift != 0: # is not a day off
+                shift_count += 1
+            else:
+                pass
+        mean_shifts = shift_count / len(self.employees_db.keys())
+
+        # count individual shift totals
+        individual_shifts = [0]*len(self.employees_db.keys()) # array of 0 shifts for each employee
+        for i in range(len(self.employees_db.keys())):
+            for n in range(28*i, 28*(i+1)):
+                if self.shifts[n] != 0:
+                    individual_shifts[i] += 1
+        
+        # average squared distance of each person's shift count from the mean
+        sq_dists =sum([(n - mean_shifts)**2 for n in individual_shifts])
+        mean_sq_dist = sum(sq_dists) / len(sq_dists)
+
+        return mean_sq_dist
     
     # Soft constraint 7: Maximize contiguous morning vs evening stretches
     def sc7_max_contiguous_stretches(self):
