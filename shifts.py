@@ -1,20 +1,12 @@
 import pandas as pd
-
-employees_db = {
-    'Adam' : {'roles' : [0, 1, 2]},
-    'Julie' : {'roles' : [0, 2, 3]},
-    'Dave' : {'roles' : [0, 1, 3]},
-    'Alice' : {'roles' : [0, 2]}
-}
-            
-shift_map = {'AM' : ['CAM1', 'IVAM1', 'IVAM2', 'IS'],
-                'PM' : ['CPM', 'IVPM', 'CCPM1', 'CCPS'],
-                'OFF' : ['PTO', 'PRO']}
+       
+# shift_map = {'AM' : ['CAM1', 'IVAM1', 'IVAM2', 'IS'],
+#                 'PM' : ['CPM', 'IVPM', 'CCPM1', 'CCPS'],
+#                 'OFF' : ['PTO', 'PRO']}
 
 class Shifts():
     def __init__(self, shifts_path):
         self.shifts_path = shifts_path
-
 
     def table_to_list(self):
         """convert table into list of (role, date) tuples"""

@@ -1,30 +1,33 @@
 # Hospital scheduling app by Kelsey Glenn
 # https://github.com/kelseyfglenn/scheduler
 
+import json
 import random
 import pandas as pd
+from shifts import Shifts
 from constraints import Constraints
+from employees import Employee, generate_employee_db
 from simanneal import Annealer
 
 
-# test inputs
+# inputs
+employees_db_file = 'employee_db.json'
+shifts_file = 'shifts.csv'
+
+with open(employees_db_file) as f:
+    employees_db = json.load(f)
+employees = [(name, i) for name in employees_db.keys() for i in range(28)] # (name, date) * (28 days * n employees)
+shifts = Shifts(shifts_file).generate() # convert shift CSV into list of (role, date) tuples
+
 hard_constraints = 'all'
 soft_constraints = 'all'
-employees_db = {
-    'Adam' : {'roles' : [0, 1, 2]},
-    'Julie' : {'roles' : [0, 2, 3]},
-    'Dave' : {'roles' : [0, 1, 3]},
-    'Alice' : {'roles' : [0, 2]}
-}
-employees_input = [(key, s) for key in employees_db.keys() for s in range(28) ]
-shifts_input = [1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] * 4
 
 
 class Scheduler(Annealer):
     def __init__(self, employees_db, employees, shifts, hard_constraints, soft_constraints):
         self.employees_db = employees_db
-        self.employees = employees_input
-        self.shifts = shifts_input
+        self.employees = employees
+        self.shifts = shifts
         self.hard_constraints = hard_constraints
         self.soft_constraints = soft_constraints
         self.constraints = Constraints(self.employees_db, self.employees, self.shifts)
@@ -61,18 +64,18 @@ class Scheduler(Annealer):
 # initialize employees, shift state, execute annealing and generate output CSV
 if __name__ == '__main__':
     # randomized initial assignments
-    init_state = shifts_input
+    init_state = shifts
     random.shuffle(init_state)
     
     # execute annealing algo
-    sched = Scheduler(employees_db, employees_input, init_state, hard_constraints, soft_constraints)
+    sched = Scheduler(employees_db, employees, init_state, hard_constraints, soft_constraints)
     sched.set_schedule(sched.auto(minutes=0.2))
     sched.copy_strategy = "slice"
     state, e = sched.anneal()
     sched.evaluate()
     
     # format schedule for output
-    output = pd.DataFrame(employees_input, columns=['employee', 'date'])
+    output = pd.DataFrame(employees, columns=['employee', 'date'])
     output['shift'] = state
     output = output.set_index(['employee', 'date']).unstack(level=[1]).reset_index()
     output.columns = output.columns.get_level_values(0)
