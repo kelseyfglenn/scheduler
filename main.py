@@ -2,9 +2,9 @@
 # https://github.com/kelseyfglenn/scheduler
 
 import random
-from simanneal import Annealer
 import pandas as pd
 from constraints import Constraints
+from simanneal import Annealer
 
 
 # test inputs
