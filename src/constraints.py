@@ -1,11 +1,11 @@
 from collections import defaultdict
-from email.policy import default
+
 
 class Constraints():
     def __init__(self, employees_db, employees, shifts):
         self.employees_db = employees_db
         self.employees = employees
-        self.shifts = shift
+        self.shifts = shifts
     
     
     # Hard constraint 1: primary ppo protected

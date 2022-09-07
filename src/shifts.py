@@ -5,8 +5,9 @@ import pandas as pd
 #                 'OFF' : ['PTO', 'PRO']}
 
 class Shifts():
-    def __init__(self, shifts_path):
+    def __init__(self, shifts_path, n_employees):
         self.shifts_path = shifts_path
+        self.n_employees = n_employees
 
     def table_to_list(self):
         """convert table into list of (role, date) tuples"""
@@ -21,7 +22,7 @@ class Shifts():
                     new_shifts.append((role_date.iloc[i][0], date))
     
             # add empty shifts for difference b/t # employees and # shifts required
-            empty_shifts = len(employees_db.keys()) - len(new_shifts) # total possible - total 
+            empty_shifts = self.n_employees - len(new_shifts) # total possible - total 
             for i in range(empty_shifts):
                 new_shifts.append(('OFF', date))
                 

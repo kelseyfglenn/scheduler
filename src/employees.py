@@ -1,6 +1,7 @@
 # Employee object definition and DB builder
 
 import json
+import random
 
 
 # Employee class
@@ -51,26 +52,27 @@ class Employee():
         self.PTO = dates
 
 
-def generate_employee_db(employee_names_file, employee_db_file):
+def generate_employee_db(names_file, output_file):
     """Generates json of employees from name list w/ empty role and PTO properties"""
     employee_dict = {}
-    with open(employee_names_file) as infile:
+    with open(names_file) as infile:
         for name in infile:
             employee_dict[name[:-1]] = {'roles' : ['OFF'], # go to -1 index to drop \n, everyone has 'OFF' role by default
-                                'PTO' : []}
-    with open(employee_db_file, 'w') as outfile:
+                                        'PTO' : []}
+    with open(output_file, 'w') as outfile:
         json.dump(employee_dict, outfile)
         
 
-def populate_test_db(employees_db, all_roles):
+def populate_test_db(employees_db, roles_file):
     """Populate a db of just employee names with random role and PTO values"""
+    all_roles = []
+    all_dates = list(range(28))
+    with open(roles_file, 'r') as f:
+        for line in f:
+            all_roles.append(line[:-1]) # :-1 to drop newline
     
     for employee in employees_db.keys():
-        all_dates = list(range(28))
-        with open('roles.txt', 'r') as f:
-            for line in f:
-                all_roles.append(line[:-1]) # :-1 to drop newline
-
+       
         # pick random n 1-4 and randomly add that many roles
         n_roles = random.randint(1,4)
         roles = random.sample(all_roles, n_roles)
@@ -83,3 +85,11 @@ def populate_test_db(employees_db, all_roles):
         employees_db[employee]['PTO'].extend(PTO)
     
     return employees_db
+
+def create_test_db(names_file, roles_file, db_file):
+    generate_employee_db(names_file, db_file)
+    with open(db_file, 'r') as infile:
+        test_db = json.load(infile)
+    populated_db = populate_test_db(test_db, roles_file)
+    with open(db_file, 'w') as outfile:
+        json.dump(populated_db, outfile)
