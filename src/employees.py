@@ -7,7 +7,11 @@ import random
 # Employee class
 class Employee:
     def __init__(
-        self, name, roles=[], PTO={"Primary": [], "Secondary": []}, requests=[]
+        self,
+        name,
+        roles=[],
+        PTO={"Primary": [], "Secondary": []},
+        requests={"On": [], "Off": []},
     ):
         self.name = name
         self.roles = roles
@@ -74,6 +78,38 @@ class Employee:
             self.PTO["Primary"] = primary
         if secondary:
             self.PTO["secondary"] = secondary
+
+    def add_requests(self, on=None, off=None):
+        if on:
+            self.requests["On"] = on
+        if off:
+            self.requests["Off"] = off
+
+    def remove_requests(self, on=None, off=None):
+        if on:
+            new_dates = []
+            removed_dates = []
+            for date in self.requests["On"]:
+                if date not in on:
+                    new_dates.append(date)
+                else:
+                    removed_dates.append(date)
+            self.requests["On"] = new_dates
+        if off:
+            new_dates = []
+            removed_dates = []
+            for date in self.requests["Off"]:
+                if date not in off:
+                    new_dates.append(date)
+                else:
+                    removed_dates.append(date)
+            self.requests["Off"] = new_dates
+
+    def set_requests(self, on=None, off=None):
+        if on:
+            self.requests["On"] = on
+        if off:
+            self.requests["Off"] = off
 
 
 def generate_employee_db(names_file, output_file):
