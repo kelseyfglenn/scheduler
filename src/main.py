@@ -13,7 +13,6 @@ from simanneal import Annealer
 employees_db_file = "../output/test_db.json"
 shifts_file = "../shifts.csv"
 
-
 with open(employees_db_file) as f:
     employees_db = json.load(f)
 employees = [

@@ -6,10 +6,13 @@ import random
 
 # Employee class
 class Employee:
-    def __init__(self, name, roles=[], PTO=[]):
+    def __init__(
+        self, name, roles=[], PTO={"Primary": [], "Secondary": []}, requests=[]
+    ):
         self.name = name
         self.roles = roles
         self.PTO = PTO
+        self.reqeusts = requests
 
     def add_roles(self, roles):
         for role in roles:
@@ -31,25 +34,46 @@ class Employee:
     def set_roles(self, roles):
         self.roles = roles
 
-    def add_PTO(self, dates):
-        for date in dates:
-            if date not in self.PTO:
-                self.PTO.append(date)
+    def add_PTO(self, primary=None, secondary=None):
+        if primary:
+            for date in primary:
+                if date not in self.PTO["Primary"]:
+                    self.PTO["Primary"].append(date)
+        if secondary:
+            for date in secondary:
+                if date not in self.PTO["Secondary"]:
+                    self.PTO["Secondary"].append(date)
 
-    def remove_PTO(self, dates):
-        new_dates = []
-        removed_dates = []
-        for date in self.PTO:
-            if date not in dates:
-                new_dates.append(date)
-            else:
-                removed_dates.append(date)
-        self.PTO = new_dates
-        print("Removed:\n")
+    def remove_PTO(self, primary=None, secondary=None):
+        if primary:
+            new_dates = []
+            removed_dates = []
+            for date in self.PTO["Primary"]:
+                if date not in primary:
+                    new_dates.append(date)
+                else:
+                    removed_dates.append(date)
+            self.PTO["Primary"] = new_dates
+        print("Removed primary PTO on dates:\n")
         print(", ".join(removed_dates))
 
-    def set_PTO(self, dates):
-        self.PTO = dates
+        if secondary:
+            new_dates = []
+            removed_dates = []
+            for date in self.PTO["Secondary"]:
+                if date not in secondary:
+                    new_dates.append(date)
+                else:
+                    removed_dates.append(date)
+            self.PTO["Secondary"] = new_dates
+        print("Removed secondary PTO on dates:\n")
+        print(", ".join(removed_dates))
+
+    def set_PTO(self, primary=None, secondary=None):
+        if primary:
+            self.PTO["Primary"] = primary
+        if secondary:
+            self.PTO["secondary"] = secondary
 
 
 def generate_employee_db(names_file, output_file):
@@ -61,7 +85,7 @@ def generate_employee_db(names_file, output_file):
                 "roles": [
                     "OFF"
                 ],  # go to -1 index to drop \n, everyone has 'OFF' role by default
-                "PTO": [],
+                "PTO": {},
             }
     with open(output_file, "w") as outfile:
         json.dump(employee_dict, outfile)
@@ -83,10 +107,12 @@ def populate_test_db(employees_db, roles_file):
 
         # pick random n 0-7 and randomly add that many PTO days
         n_PTO = random.randint(0, 7)
-        PTO = random.sample(all_dates, n_PTO)
+        primary_PTO = random.sample(all_dates, n_PTO)
+        secondary_PTO = random.sample(all_dates, n_PTO)
 
         employees_db[employee]["roles"].extend(roles)
-        employees_db[employee]["PTO"].extend(PTO)
+        employees_db[employee]["PTO"]["Primary"].extend(primary_PTO)
+        employees_db[employee]["PTO"]["Secondary"].extend(secondary_PTO)
 
     return employees_db
 
