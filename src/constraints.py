@@ -10,7 +10,14 @@ class Constraints:
     # Hard constraint 1: primary ppo protected
     def hc1_primary_pto_protected(self):
         c = 0
-        ###
+        # iterate thru employee, shifts and check each shift against PPTO
+        for i in range(len(self.shifts)):
+            if (
+                self.shifts[i][1]
+                in self.employees_db[self.employees[i][0]]["PTO"]["Primary"]
+            ):
+                if self.shifts[i][0] != "OFF":
+                    c += 1
         return c
 
     # Hard constraint 2: all shifts filled
@@ -24,7 +31,10 @@ class Constraints:
         """check if employees are qualified for shift role and return # invalid shifts"""
         c = 0
         for i in range(len(self.shifts)):
-            if self.shifts[i] not in self.employees_db[self.employees[i][0]]["roles"]:
+            if (
+                self.shifts[i][0]
+                not in self.employees_db[self.employees[i][0]]["roles"]
+            ):
                 c += 1
         return c
 
@@ -81,7 +91,10 @@ class Constraints:
     # Soft constraint 5: Secondary schedule requests
     def sc5_secondary_sched_reqs(self):
         c = 0
-        ###
+        # iterate thru employee, shifts and check each shift against PPTO
+        # for i in range(len(self.shifts)):
+        #     if self.shifts[i][1] in self.employees_db[self.employees[i][0]]['requests']['Off']:
+        #         c += 1
         return c
 
     # Soft constraint 6: Shift distribution equal between team members
